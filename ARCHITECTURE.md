@@ -75,6 +75,10 @@ Fluttert a domain-forrásba).
   l10n-felelősség. A domain csak az enum-értéket ismeri.
 - `Player` — immutable: `name` (trimmelt, nem üres, a játékoslistán belül
   egyedi), `team`.
+- `Roster` — immutable setup-aggregátum: a játékosok listája
+  csapat-hovatartozással; a csapatnézetek (`first`, `second`) és az
+  `isStartable` (mindkét csapat ≥ 1 fő) a `Player.team`-ből származnak, a
+  kézi korrekció (`moveToOtherTeam`) egyetlen mezőt billent.
 - `TaskType` — enum a gyűjtő hat típusával: `jatek`, `parbaj`, `virus`,
   `feladat`, `activity`, `egyeb`. Tisztán prezentációs kategória (badge/szín),
   játéklogikát nem hordoz (ADR-0001).
@@ -250,6 +254,10 @@ A kiszűrt sablonok logolódnak (debug). Üres játszható pakli → domain-hiba
 domain lokalizáció-agnosztikus marad.
 
 ## 6. Csapatsorsolás
+
+A use case a `DrawTeams` (`Roster call(List<String> names, Random
+random)`); a kimenet egy `Roster`. Az újrasorsolás a `call` ismételt
+hívása, a kézi korrekció a `Roster.moveToOtherTeam`.
 
 - Bemenet: érvényes játékoslista (trimmelt, nem üres, egyedi nevek) és
   injektált `Random`.
