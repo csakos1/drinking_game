@@ -182,10 +182,13 @@ egyetlen érvénytelen sablon a teljes tartalmat érvényteleníti — hibás ta
 sosem kerül részlegesen használatba; a pipeline ilyenkor a korábbi érvényes
 tartalmat szolgálja ki (7. fejezet).
 
-Hibaosztályok (sealed): `malformedJson`, `unsupportedVersion`,
-`emptyTemplateList`, `duplicateId`, `unknownType`, `unknownConstraint`,
-`invalidPlayerCount`, `placeholderMismatch`, `blankText`. A sablonhoz kötött
-hibák hordozzák az érintett `id`-t.
+Hibaosztályok (sealed): `MalformedJson` (dokumentum-szintű JSON-/
+szerkezethiba), `MalformedTemplate` (sablonszintű strukturális hiba: hiányzó
+vagy rossz típusú kötelező mező), `UnsupportedVersion`, `EmptyTemplateList`,
+`DuplicateId`, `UnknownType`, `UnknownConstraint`, `InvalidPlayerCount`,
+`PlaceholderMismatch` (hiányzó, többlet, ismeretlen vagy rossz helyű token),
+`BlankText`. A sablonhoz kötött hibák hordozzák az érintett `id`-t (ha
+kiolvasható volt), a dokumentum-szintűek `null` `templateId`-t adnak.
 
 Nem támogatott `version` → `unsupportedVersion`: az app elutasítja és logolja,
 nem crashel. Sémabővítés = verzióemelés + új ADR.
@@ -340,9 +343,13 @@ jellemzően `oppositeTeams`, de ez nem sémaszabály).
 - Lint: `very_good_analysis`; az analyze `--fatal-infos --fatal-warnings`
   kapcsolókkal fut.
 - Formátum: `dart format`, page_width 100 (az `analysis_options.yaml`
-  formatter szekciójában). A Foretackból ismert 80/100-interplay konvenció
-  érvényes: a 81–100 közé eső switch-kifejezések `final` változóba emelendők;
-  a 80 oszlopos ellenőrzés kódpontot számol, nem byte-ot.
+  formatter szekciójában). A very_good alapértelmezett
+  `lines_longer_than_80_chars` lintje **ki van kapcsolva**: a formatter
+  100-ig egy sorba tördel, a 80 oszlopos lint viszont ez alatt panaszkodna,
+  így a kettő egymásnak feszülne és nem lenne egyszerre kielégíthető. A
+  mérvadó sorhossz egységesen 100; a formatter és a linter így egyetért,
+  nincs kézi 80-as igazítgatás (eltérés a Foretack `final`-be emelős
+  konvenciójától, tudatosan).
 - Pre-flight minden commit előtt (nincs Melos, közvetlen parancslánc):
 
 ```bash

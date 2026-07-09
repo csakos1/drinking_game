@@ -8,3 +8,12 @@ analyzer:
 
 formatter:
   page_width: 100
+
+linter:
+  rules:
+    # A formatter page_width 100-ra van allitva, ezert a very_good
+    # alapertelmezett 80 oszlopos lint-szabalyat kikapcsoljuk: kulonben a
+    # ketto egymasnak feszul (a formatter 100-ig egy sorba tordel, a lint
+    # 80-nal panaszkodik), es nem lehet egyszerre kielegiteni oket. A 100
+    # a mervado sorhossz.
+    lines_longer_than_80_chars: false
