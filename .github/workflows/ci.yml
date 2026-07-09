@@ -15,10 +15,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # A Flutter-verzio a lokalis fejlesztogep verziojahoz van pinelve.
+      # Enelkul a runner mindig a legfrissebb stable-t huzna, es a dart
+      # format ujabb formatterrel maskepp tordelne, mint amit lokalisan
+      # commitolunk -> a format-check hamisan elhasalna.
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: 3.41.x
 
       - name: Install dependencies
         run: flutter pub get
