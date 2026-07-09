@@ -59,14 +59,20 @@ data-implementációkat az application köti be providereken keresztül (DIP;
 tesztben provider-override).
 
 **Domain-tisztaság:** a domain rétegben megengedett import kizárólag
-`dart:core`, `dart:convert`, `dart:math` és más domain-fájl. Tilos: Flutter,
-`dart:io`, bármely külső csomag, bármely másik réteg. Betartatás: fegyelem +
-lint + tesztek (a domain-tesztek nem importálnak Fluttert).
+`dart:core`, `dart:convert`, `dart:math`, más domain-fájl és — egyetlen
+indokolt kivételként — a `package:meta` (annotáció-only, pl. `@immutable`;
+a Dart SDK szállítja, futásidejű viselkedése nincs). Tilos: Flutter,
+`dart:io`, minden más külső csomag, bármely másik réteg. Betartatás:
+fegyelem + lint + a `domain_purity_test` guard, ami a `lib/src/domain/`
+fájljait scanneli tiltott importokra (a domain-tesztek nem importálnak
+Fluttert a domain-forrásba).
 
 ## 3. Domain-modell
 
-- `Team` — enum: `red`, `blue`. A megjelenítési címke („piros csapat",
-  „kék csapat") l10n-ből jön; a domain csak az enum-értéket ismeri.
+- `Team` — enum: `first`, `second`. A domain szándékosan semleges neveket
+  használ szín helyett; a megjelenített csapatszín (piros/kék) és a
+  lokalizált címke („piros csapat", „kék csapat") tisztán presentation-/
+  l10n-felelősség. A domain csak az enum-értéket ismeri.
 - `Player` — immutable: `name` (trimmelt, nem üres, a játékoslistán belül
   egyedi), `team`.
 - `TaskType` — enum a gyűjtő hat típusával: `jatek`, `parbaj`, `virus`,
