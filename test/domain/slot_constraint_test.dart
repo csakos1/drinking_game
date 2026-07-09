@@ -54,6 +54,97 @@ void main() {
     });
   });
 
+  group('SlotConstraint.isSatisfiableBy', () {
+    test('anyone: az összlétszám számít', () {
+      expect(
+        SlotConstraint.anyone.isSatisfiableBy(
+          firstTeamSize: 2,
+          secondTeamSize: 1,
+          playerCount: 3,
+        ),
+        isTrue,
+      );
+      expect(
+        SlotConstraint.anyone.isSatisfiableBy(
+          firstTeamSize: 2,
+          secondTeamSize: 1,
+          playerCount: 4,
+        ),
+        isFalse,
+      );
+    });
+
+    test('sameTeam: a nagyobbik csapat létszáma számít', () {
+      expect(
+        SlotConstraint.sameTeam.isSatisfiableBy(
+          firstTeamSize: 3,
+          secondTeamSize: 1,
+          playerCount: 3,
+        ),
+        isTrue,
+      );
+      expect(
+        SlotConstraint.sameTeam.isSatisfiableBy(
+          firstTeamSize: 2,
+          secondTeamSize: 2,
+          playerCount: 3,
+        ),
+        isFalse,
+      );
+    });
+
+    test('oppositeTeams: mindkét csapatban kell legalább egy fő', () {
+      expect(
+        SlotConstraint.oppositeTeams.isSatisfiableBy(
+          firstTeamSize: 1,
+          secondTeamSize: 1,
+          playerCount: 2,
+        ),
+        isTrue,
+      );
+      expect(
+        SlotConstraint.oppositeTeams.isSatisfiableBy(
+          firstTeamSize: 3,
+          secondTeamSize: 0,
+          playerCount: 2,
+        ),
+        isFalse,
+      );
+    });
+
+    test('wholeTeam és everyone mindig játszható', () {
+      for (final constraint in [
+        SlotConstraint.wholeTeam,
+        SlotConstraint.everyone,
+      ]) {
+        expect(
+          constraint.isSatisfiableBy(
+            firstTeamSize: 1,
+            secondTeamSize: 0,
+            playerCount: 0,
+          ),
+          isTrue,
+        );
+      }
+    });
+
+    test('a két csapatméret szerepe szimmetrikus', () {
+      for (final constraint in SlotConstraint.values) {
+        final ab = constraint.isSatisfiableBy(
+          firstTeamSize: 3,
+          secondTeamSize: 1,
+          playerCount: 2,
+        );
+        final ba = constraint.isSatisfiableBy(
+          firstTeamSize: 1,
+          secondTeamSize: 3,
+          playerCount: 2,
+        );
+        expect(ab, ba, reason: '$constraint nem szimmetrikus');
+      }
+    });
+  });
+
   group('SlotConstraint értékkészlet', () {
     test('öt megkötés van', () {
       expect(SlotConstraint.values, hasLength(5));
