@@ -9,6 +9,8 @@ Kapcsolódó ADR-ek:
 
 - [ADR-0001](docs/decisions/0001-task-template-schema.md) — task-template séma
   és megkötés-modell.
+- [ADR-0002](docs/decisions/0002-content-source-abstraction.md) —
+  tartalomforrás-absztrakció és cache-orchestráció.
 
 ## 1. Hatókör
 
@@ -323,6 +325,35 @@ kézzel kurálja a séma szerinti tartalommá — editori lépés, nem applogika
 Konvenciók: X → `{p1}`, Y → `{p2}`; a gyűjtőbeli típus átvihető `type`-ként; a
 `constraint`-et a tartalom alapján az editor választja (egy „párbaj"
 jellemzően `oppositeTeams`, de ez nem sémaszabály).
+
+### Data-osztályok
+
+Az [ADR-0002](docs/decisions/0002-content-source-abstraction.md) szerint a
+data-réteg konkrét formája:
+
+- **Read-interfész:** `TaskTemplateSource.load()` →
+  `Future<Result<String, TaskSourceError>>`; nyers JSON stringet ad. A `Result`
+  a domainből újrahasznosítva; a tartalom érvényessége nem a forrás, hanem a
+  `ContentValidator` dolga.
+- **Hibatípus:** külön, data-rétegbeli `sealed TaskSourceError`
+  (`notFound` / `unreadable` / `network`) — nem a domain
+  `ContentValidationError`. Az I/O-hiba nem tartalom-validációs hiba (SRP); a
+  `notFound` nem „kemény" hiba, ilyenkor a repository a következő forrásra lép.
+- **Cache írása:** a `CachedFileTaskTemplateSource` a közös `load()`-on túl egy
+  `save(String rawJson)`-t is ad, amely a temp-írás + rename atomi cserét maga
+  végzi. Minden fájlút/`dart:io`-fogalom a cache-osztályon belül marad; a
+  read-interfész csak olvas (ISP).
+- **Injektálás:** a cache-könyvtárat (`Directory`) és a remote URL-t (`Uri`) a
+  composition root (application) oldja fel és adja be konstruktorban; a
+  `RemoteTaskTemplateSource` `http.Client`-et és timeoutot is kap. A
+  `path_provider`-hívás kizárólag a composition rootban él — a platform-channel
+  nem szivárog a forrásba, a források temp-könyvtárral / fake klienssel
+  tesztelhetők.
+- **Repository:** mivel a bundled asset a séma-teszt miatt mindig érvényes
+  padló, a `TaskContentRepository.loadContent()` nem-nullable `TaskContent`-et
+  ad — sosem bukhat teljesen.
+- **Új függőségek:** `path_provider` (adatkönyvtár) és `http` (remote fetch,
+  injektált klienssel). A domain-tisztaság érintetlen.
 
 ## 8. Perzisztencia
 
