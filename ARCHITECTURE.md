@@ -253,6 +253,17 @@ A kiszűrt sablonok logolódnak (debug). Üres játszható pakli → domain-hiba
 `teamLabels: Map<Team, String>` a hívótól (application, l10n-ből) érkezik — a
 domain lokalizáció-agnosztikus marad.
 
+### Domain-osztályok
+
+A motort tiszta use case-ek valósítják meg: `StartGame` (kezdő pakli +
+játszhatósági szűrés), `DrawTemplate` (id-húzás, reshuffle, a határon
+ismétlés-tilalommal), `SelectSlot` (fair szereplőválasztás; kimenete a
+sealed `SlotSelection`: `PlayerSlots` / `TeamSlot` / `NoSlot`), és a
+`DrawNext` orchestráció (húzás → választás → feloldás → állapotléptetés),
+melynek kimenete a `ResolvedCard`. Az állapotot a `GameState` hordozza: a
+pakli-mezők mellett a fairness-mezők (`appearanceCounts`,
+`previousParticipants`, `lastWholeTeam`).
+
 ## 6. Csapatsorsolás
 
 A use case a `DrawTeams` (`Roster call(List<String> names, Random
