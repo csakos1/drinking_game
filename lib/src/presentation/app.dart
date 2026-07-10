@@ -2,13 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:igyal2/src/application/game_providers.dart';
 import 'package:igyal2/src/application/game_session.dart';
+import 'package:igyal2/src/presentation/l10n/app_strings.dart';
 import 'package:igyal2/src/presentation/theme/app_colors.dart';
 import 'package:igyal2/src/presentation/theme/app_theme.dart';
 
-/// Az Igyál 2 gyökérwidgetje: téma + az állapotvezérelt képernyőváltás.
+/// Az Igyál 2 gyökérwidgetje: téma, lokalizáció, és az állapotvezérelt
+/// képernyőváltás.
 class IgyalApp extends StatelessWidget {
   /// Létrehoz egy [IgyalApp] példányt.
   const IgyalApp({super.key});
@@ -19,6 +22,14 @@ class IgyalApp extends StatelessWidget {
       title: 'Igyál 2',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
+      locale: const Locale('hu'),
+      supportedLocales: AppStrings.supportedLocales,
+      localizationsDelegates: const [
+        AppStrings.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: const _SessionRouter(),
     );
   }
