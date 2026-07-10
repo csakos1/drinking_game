@@ -349,9 +349,21 @@ data-réteg konkrét formája:
   `path_provider`-hívás kizárólag a composition rootban él — a platform-channel
   nem szivárog a forrásba, a források temp-könyvtárral / fake klienssel
   tesztelhetők.
-- **Repository:** mivel a bundled asset a séma-teszt miatt mindig érvényes
-  padló, a `TaskContentRepository.loadContent()` nem-nullable `TaskContent`-et
-  ad — sosem bukhat teljesen.
+- **Repository:** a `TaskContentRepository` a belépőpont. Olvasási sorrend:
+  érvényes cache → bundled padló; mindkettő átmegy a `ContentValidator`-on,
+  az érvénytelen cache-t eldobja (`clear()`). Mivel a bundled a séma-teszt
+  miatt mindig érvényes padló, a `loadContent()` nem-nullable `TaskContent`-et
+  ad — sosem bukhat teljesen (ha a bundled mégis olvashatatlan/érvénytelen,
+  az build-/programozói hiba → `StateError`). A háttér-frissítést a
+  `refreshInBackground()` végzi fire-and-forget módon: remote fetch →
+  validálás → atomi cache-csere; minden hibát némán elnyel (naplózva), és
+  sosem blokkolja a UI-t.
+- **Cache-interfész (ISP/DIP):** a repository az írási úton nem a konkrét
+  `CachedFileTaskTemplateSource`-tól függ, hanem egy szűk `TaskTemplateCache`
+  absztrakciótól, amely a `TaskTemplateSource` `load()`-ját `save()`-vel és
+  `clear()`-rel egészíti ki. Így az érvénytelen cache eldobása és az atomi
+  csere DIP-tisztán, valós fájlrendszer nélkül tesztelhető; a bundled és a
+  remote sima `TaskTemplateSource` marad.
 - **Új függőségek:** `path_provider` (adatkönyvtár) és `http` (remote fetch,
   injektált klienssel). A domain-tisztaság érintetlen.
 
