@@ -84,6 +84,9 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Igyunk'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Csapatok'), findsOneWidget);
+    // A proceed a csapat-áttekintőre vált: megjelenik a KEZDÉS, eltűnik az
+    // IGYUNK.
+    expect(find.text('Kezdés'), findsOneWidget);
+    expect(find.text('Igyunk'), findsNothing);
   });
 }

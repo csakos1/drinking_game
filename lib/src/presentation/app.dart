@@ -8,6 +8,7 @@ import 'package:igyal2/src/application/game_providers.dart';
 import 'package:igyal2/src/application/game_session.dart';
 import 'package:igyal2/src/presentation/l10n/app_strings.dart';
 import 'package:igyal2/src/presentation/screens/setup_screen.dart';
+import 'package:igyal2/src/presentation/screens/teams_screen.dart';
 import 'package:igyal2/src/presentation/theme/app_colors.dart';
 import 'package:igyal2/src/presentation/theme/app_theme.dart';
 
@@ -39,9 +40,8 @@ class IgyalApp extends StatelessWidget {
 /// A `GameSession`-re kapcsoló képernyő-router.
 ///
 /// A fő folyamot az állapotgép vezérli (nincs explicit Navigator): a sealed
-/// [GameSession] konkrét típusa dönti el, melyik képernyő látszik. A setup
-/// (P2) már a valós [SetupScreen]; a csapat-áttekintő és a kártya (P3–P4) még
-/// témázott placeholder.
+/// [GameSession] konkrét típusa dönti el, melyik képernyő látszik. A setup (P2)
+/// és a csapat-áttekintő (P3) már valós; a kártya (P4) még témázott placeholder.
 class _SessionRouter extends ConsumerWidget {
   const _SessionRouter();
 
@@ -50,20 +50,19 @@ class _SessionRouter extends ConsumerWidget {
     final session = ref.watch(gameSessionProvider);
     return switch (session) {
       GameSetup() => const SetupScreen(),
-      GameTeams() => const _Placeholder(label: 'Csapatok', portrait: false),
-      GamePlaying() => const _Placeholder(label: 'Kártya', portrait: false),
+      GameTeams() => const TeamsScreen(),
+      GamePlaying() => const _Placeholder(label: 'Kártya'),
     };
   }
 }
 
 /// Ideiglenes, témázott placeholder egy állapothoz; a valós képernyőt a
-/// megfelelő presentation-szelet cseréli be. Az orientációt az állapothoz
-/// igazítja (setup álló, a többi fekvő).
+/// megfelelő presentation-szelet cseréli be. Fekvő orientációt kényszerít (a
+/// hátralévő kártya-képernyő is fekvő).
 class _Placeholder extends StatefulWidget {
-  const _Placeholder({required this.label, required this.portrait});
+  const _Placeholder({required this.label});
 
   final String label;
-  final bool portrait;
 
   @override
   State<_Placeholder> createState() => _PlaceholderState();
@@ -74,14 +73,10 @@ class _PlaceholderState extends State<_Placeholder> {
   void initState() {
     super.initState();
     unawaited(
-      SystemChrome.setPreferredOrientations(
-        widget.portrait
-            ? const [DeviceOrientation.portraitUp]
-            : const [
-                DeviceOrientation.landscapeLeft,
-                DeviceOrientation.landscapeRight,
-              ],
-      ),
+      SystemChrome.setPreferredOrientations(const [
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]),
     );
   }
 
