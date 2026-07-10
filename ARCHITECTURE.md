@@ -266,22 +266,27 @@ melynek kimenete a `ResolvedCard`. Az állapotot a `GameState` hordozza: a
 pakli-mezők mellett a fairness-mezők (`appearanceCounts`,
 `previousParticipants`, `lastWholeTeam`).
 
-## 6. Csapatsorsolás
+## 6. Csapatsorsolás és -alkotás
 
-A use case a `DrawTeams` (`Roster call(List<String> names, Random
-random)`); a kimenet egy `Roster`. Az újrasorsolás a `call` ismételt
-hívása, a kézi korrekció a `Roster.moveToOtherTeam`.
+A csapatalkotás két-csapatos beviteli modellen alapul (lásd ADR-0003). A domain
+use case a `DrawTeams` (`Roster call(List<String> names, Random random)`); a
+kimenet egy `Roster`.
 
-- Bemenet: érvényes játékoslista (trimmelt, nem üres, egyedi nevek) és
-  injektált `Random`.
-- Véletlen sorsolás: keverés, majd ⌈n/2⌉ / ⌊n/2⌋ felosztás; páratlan
-  létszámnál véletlen, melyik csapat kap eggyel több tagot.
-- Újrasorsolás: független ismételt hívás.
-- Kézi korrekció: játékos áthelyezése a másik csapatba a setup-képernyőn. A
-  ⌈n/2⌉/⌊n/2⌋ garancia a véletlen sorsolásra vonatkozik; a kézi szerkesztés
-  felboríthatja az egyensúlyt — ez megengedett.
-- Indítási feltétel (a „Kezdés" gomb aktív): mindkét csapatban legalább 1 fő.
-  Más korlát nincs.
+- **Bevitel:** két névlista (`firstNames` / `secondNames`), csapatonként töltve.
+  A nevek trimmeltek, nem üresek, és a két listán keresztül is egyediek.
+- **Feltételes csapatalkotás (IGYUNK):**
+  - csak az első csapat kitöltve (üres második, legalább két név) → `DrawTeams`
+    véletlen, egyenlő felosztás (⌈n/2⌉ / ⌊n/2⌋; páratlan létszámnál véletlen,
+    melyik csapaté a nagyobbik fél);
+  - mindkét csapat kitöltve → kézi `Roster` (első lista → `Team.first`, második
+    → `Team.second`), változatlanul, akár egyenlőtlen létszámmal.
+- **Áttekintő (`GameTeams`):** a kész csapatokat mutatja; innen indul a játék
+  (KEZDÉS). Auto-split esetén elérhető az újrasorsolás; a setupra vissza lehet
+  lépni szerkesztésre. Egyéni átmozgatás v1-ben nincs (a `Roster.moveToOtherTeam`
+  a domainben marad, későbbi felhasználásra).
+- **Indítási feltétel (a „Kezdés” aktív):** mindkét csapatban legalább 1 fő. A
+  ⌈n/2⌉/⌊n/2⌋ garancia csak az auto-splitre vonatkozik; a kézi felosztás
+  egyenlőtlen is lehet. Más korlát nincs.
 
 ## 7. Tartalom-pipeline
 
