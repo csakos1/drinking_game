@@ -78,4 +78,47 @@ void main() {
       expect(File('${dir.path}/tasks.json.tmp').existsSync(), isFalse);
     });
   });
+
+  group('clear', () {
+    test('létező cache-fájlt töröl, a fájl nem marad a lemezen', () async {
+      // Given: van érvényes cache-fájl a lemezen.
+      await File('${dir.path}/tasks.json').writeAsString('{"version":1}');
+      final source = CachedFileTaskTemplateSource(dir);
+
+      // When: clear.
+      final clearResult = await source.clear();
+
+      // Then: siker, és a fájl eltűnt.
+      expect(clearResult.isSuccess, isTrue);
+      expect(File('${dir.path}/tasks.json').existsSync(), isFalse);
+    });
+
+    test('hiányzó cache-fájl esetén is Success', () async {
+      // Given: nincs cache-fájl (nincs mit törölni).
+      final source = CachedFileTaskTemplateSource(dir);
+
+      // When: clear.
+      final clearResult = await source.clear();
+
+      // Then: no-throw szerződés — a hiányzó fájl nem hiba.
+      expect(clearResult.isSuccess, isTrue);
+    });
+
+    test('törlés után load → TaskSourceNotFound', () async {
+      // Given: van cache-fájl, majd töröljük.
+      await File('${dir.path}/tasks.json').writeAsString('{"version":1}');
+      final source = CachedFileTaskTemplateSource(dir);
+
+      // When: clear, aztán load.
+      await source.clear();
+      final result = await source.load();
+
+      // Then: a törlés valóban eltávolította a padlót → NotFound.
+      final error = switch (result) {
+        Success() => fail('Failure-t vártunk törlés után.'),
+        Failure(:final error) => error,
+      };
+      expect(error, isA<TaskSourceNotFound>());
+    });
+  });
 }
