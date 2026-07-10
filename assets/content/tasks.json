@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "templates": [
+    {
+      "id": "jatek-001",
+      "type": "jatek",
+      "constraint": "anyone",
+      "playerCount": 1,
+      "text": "A következő 5 körben, ha {p1} iszik, az egész csapatának innia kell vele!"
+    },
+    {
+      "id": "virus-001",
+      "type": "virus",
+      "constraint": "everyone",
+      "playerCount": 0,
+      "text": "Buffalo! Mostantól nem tarthatjátok az italotokat az erősebb kezetekben! Minden hibáért 2 kortyot isztok."
+    },
+    {
+      "id": "parbaj-001",
+      "type": "parbaj",
+      "constraint": "anyone",
+      "playerCount": 1,
+      "text": "{p1}, csinálj valamilyen kézmozdulatot vagy gesztust! A következő játékos ismételje el az eddigieket, majd adjon hozzá egyet. Aki elrontja, igyon 4 kortyot."
+    },
+    {
+      "id": "jatek-002",
+      "type": "jatek",
+      "constraint": "anyone",
+      "playerCount": 2,
+      "text": "Döntsétek el, hogy {p1} vagy {p2} igyon 2 kortyot!"
+    },
+    {
+      "id": "virus-002",
+      "type": "virus",
+      "constraint": "anyone",
+      "playerCount": 1,
+      "text": "{p1} megadja a módját! Ahányszor {p1} iszik, koccintania kell valakivel, aki utána annyi kortyot iszik, amennyit ő."
+    }
+  ]
+}

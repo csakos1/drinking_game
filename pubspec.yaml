@@ -2,20 +2,18 @@ name: igyal2
 description: "Igyal 2 - party drinking game"
 publish_to: 'none'
 version: 0.1.0+1
-
 environment:
   sdk: ^3.11.5
-
 dependencies:
   flutter:
     sdk: flutter
   http: ^1.2.0
   meta: ^1.17.0
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
   very_good_analysis: ^10.0.0
-
 flutter:
   uses-material-design: true
+  assets:
+    - assets/content/tasks.json
