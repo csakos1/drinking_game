@@ -93,26 +93,28 @@ class _CardScreenState extends ConsumerState<CardScreen> {
           key: const Key('card_tap_area'),
           onTap: notifier.next,
           behavior: HitTestBehavior.opaque,
+          // A bal/jobb behúzást kikapcsoljuk: fekvőben a notch a bal él mentén
+          // fut, és az aszimmetrikus behúzás jobbra tolná a tartalmat. A
+          // vízszintes térközt a Padding adja, a felső/alsó biztonságot a
+          // SafeArea top/bottom.
           child: SafeArea(
+            left: false,
+            right: false,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 20,
-              ),
+              padding: const EdgeInsets.fromLTRB(40, 32, 40, 24),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     _typeLabel(card.type, strings),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: AppTheme.displayFontFamily,
-                      fontSize: 40,
+                      fontSize: 56,
                       letterSpacing: 1.5,
                       color: isVirus ? AppColors.accent : AppColors.onBackground,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 28),
                   Text.rich(
                     TextSpan(
                       children: teamHighlightSpans(
@@ -123,7 +125,7 @@ class _CardScreenState extends ConsumerState<CardScreen> {
                     ),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      fontSize: 30,
+                      fontSize: 34,
                       height: 1.3,
                       color: AppColors.onBackground,
                     ),

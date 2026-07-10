@@ -121,12 +121,9 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
               ),
               const SizedBox(height: 12),
               Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 360),
-                  child: _StartButton(
-                    label: strings.start,
-                    onPressed: _isStarting ? null : () => unawaited(_start()),
-                  ),
+                child: _StartButton(
+                  label: strings.start,
+                  onPressed: _isStarting ? null : () => unawaited(_start()),
                 ),
               ),
             ],
@@ -185,7 +182,8 @@ class _TeamColumn extends StatelessWidget {
   }
 }
 
-/// A KEZDÉS gomb: CTA-zöld kitöltés, comic betűtípus.
+/// A KEZDÉS gomb: CTA-zöld kitöltés, comic betűtípus, a felirat köré szabott
+/// (kompakt) szélességgel.
 ///
 /// Az [onPressed] `null` értéke letiltja a gombot (a betöltés idejére), ekkor
 /// semleges szürke háttérrel, halvány felirattal jelenik meg.
@@ -204,25 +202,18 @@ class _StartButton extends StatelessWidget {
         foregroundColor: AppColors.deep,
         disabledBackgroundColor: AppColors.neutral,
         disabledForegroundColor: AppColors.onBackground.withValues(alpha: 0.5),
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.play_arrow),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              fontFamily: AppTheme.displayFontFamily,
-              fontSize: 28,
-              letterSpacing: 1.5,
-            ),
-          ),
-        ],
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontFamily: AppTheme.displayFontFamily,
+          fontSize: 28,
+          letterSpacing: 1.5,
+        ),
       ),
     );
   }
