@@ -108,7 +108,10 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Kezdés'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Kártya'), findsOneWidget);
+    // A kártya-képernyőre váltunk: a teljes képernyős koppintási terület jelen,
+    // a KEZDÉS gomb eltűnt.
+    expect(find.byKey(const Key('card_tap_area')), findsOneWidget);
+    expect(find.text('Kezdés'), findsNothing);
   });
 }
 

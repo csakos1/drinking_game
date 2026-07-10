@@ -1,15 +1,12 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:igyal2/src/application/game_providers.dart';
 import 'package:igyal2/src/application/game_session.dart';
 import 'package:igyal2/src/presentation/l10n/app_strings.dart';
+import 'package:igyal2/src/presentation/screens/card_screen.dart';
 import 'package:igyal2/src/presentation/screens/setup_screen.dart';
 import 'package:igyal2/src/presentation/screens/teams_screen.dart';
-import 'package:igyal2/src/presentation/theme/app_colors.dart';
 import 'package:igyal2/src/presentation/theme/app_theme.dart';
 
 /// Az Igyál 2 gyökérwidgetje: téma, lokalizáció, és az állapotvezérelt
@@ -40,8 +37,8 @@ class IgyalApp extends StatelessWidget {
 /// A `GameSession`-re kapcsoló képernyő-router.
 ///
 /// A fő folyamot az állapotgép vezérli (nincs explicit Navigator): a sealed
-/// [GameSession] konkrét típusa dönti el, melyik képernyő látszik. A setup (P2)
-/// és a csapat-áttekintő (P3) már valós; a kártya (P4) még témázott placeholder.
+/// [GameSession] konkrét típusa dönti el, melyik képernyő látszik. Mindhárom
+/// állapotnak megvan a valós képernyője (setup → csapat-áttekintő → kártya).
 class _SessionRouter extends ConsumerWidget {
   const _SessionRouter();
 
@@ -51,48 +48,7 @@ class _SessionRouter extends ConsumerWidget {
     return switch (session) {
       GameSetup() => const SetupScreen(),
       GameTeams() => const TeamsScreen(),
-      GamePlaying() => const _Placeholder(label: 'Kártya'),
+      GamePlaying() => const CardScreen(),
     };
-  }
-}
-
-/// Ideiglenes, témázott placeholder egy állapothoz; a valós képernyőt a
-/// megfelelő presentation-szelet cseréli be. Fekvő orientációt kényszerít (a
-/// hátralévő kártya-képernyő is fekvő).
-class _Placeholder extends StatefulWidget {
-  const _Placeholder({required this.label});
-
-  final String label;
-
-  @override
-  State<_Placeholder> createState() => _PlaceholderState();
-}
-
-class _PlaceholderState extends State<_Placeholder> {
-  @override
-  void initState() {
-    super.initState();
-    unawaited(
-      SystemChrome.setPreferredOrientations(const [
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text(
-          widget.label,
-          style: const TextStyle(
-            fontFamily: AppTheme.displayFontFamily,
-            fontSize: 44,
-            color: AppColors.accent,
-          ),
-        ),
-      ),
-    );
   }
 }
