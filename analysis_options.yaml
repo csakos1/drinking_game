@@ -17,3 +17,10 @@ linter:
     # 80-nal panaszkodik), es nem lehet egyszerre kielegiteni oket. A 100
     # a mervado sorhossz.
     lines_longer_than_80_chars: false
+    # A one_member_abstracts lintet kikapcsoljuk: a Clean Architecture DIP-
+    # varratai (pl. TaskTemplateSource) szandekosan egymetodusos interfeszek,
+    # amiket tobb nevesitett implementacio valosit meg es Riverpod-on at
+    # injektalunk. A lint javaslata (typedef-fuggveny) ezt a mintat verne
+    # szet, es nem enged nevesitett, tobbfele forrast (bundled/cache/remote),
+    # ahol a cache ezen felul meg save()-et is ad.
+    one_member_abstracts: false
