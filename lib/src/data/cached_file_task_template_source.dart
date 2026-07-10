@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:igyal2/src/data/task_source_error.dart';
-import 'package:igyal2/src/data/task_template_source.dart';
+import 'package:igyal2/src/data/task_template_cache.dart';
 import 'package:igyal2/src/domain/result.dart';
 
 /// A lokális cache-fájl forrása (app-adatkönyvtár).
@@ -10,7 +10,11 @@ import 'package:igyal2/src/domain/result.dart';
 /// nem itt — így a forrás temp-könyvtárral tesztelhető). A tartalmat a
 /// `tasks.json` fájlban tárolja; a mentés atomi (temp fájl + `rename`), így
 /// félbeszakadt írás sosem hagy sérült cache-t.
-class CachedFileTaskTemplateSource implements TaskTemplateSource {
+///
+/// A [TaskTemplateCache]-t valósítja meg: a közös `load()`-on túl `save()`-t
+/// és `clear()`-t is ad, így a repository forrás-agnosztikusan (DIP) végezheti
+/// az atomi cache-cserét és az érvénytelen cache eldobását.
+class CachedFileTaskTemplateSource implements TaskTemplateCache {
   /// Létrehoz egy [CachedFileTaskTemplateSource]-t a megadott
   /// app-adatkönyvtárral.
   CachedFileTaskTemplateSource(this._directory);
@@ -39,13 +43,10 @@ class CachedFileTaskTemplateSource implements TaskTemplateSource {
     }
   }
 
-  /// Atomikusan lementi a [rawJson] nyers tartalmat a cache-be.
-  ///
-  /// Előbb egy temp fájlba ír (flush-sal), majd `rename`-mel a végleges névre
-  /// lép (azonos fájlrendszeren atomi), így félbeszakadt írás nem hagy sérült
-  /// cache-t. A könyvtárat szükség esetén létrehozza. Hiba esetén — a
-  /// no-throw szerződéshez híven — [Failure]-t ad, nem dob.
+  @override
   Future<Result<void, TaskSourceError>> save(String rawJson) async {
+    // Előbb temp fájlba írunk (flush-sal), majd rename a véglegesre (azonos
+    // fs-en atomi), így félbeszakadt írás nem hagy sérült cache-t.
     try {
       if (!_directory.existsSync()) {
         await _directory.create(recursive: true);
@@ -56,6 +57,21 @@ class CachedFileTaskTemplateSource implements TaskTemplateSource {
       return const Success<void, TaskSourceError>(null);
     } on Object catch (e) {
       return Failure(TaskSourceUnreadable('Cache mentési hiba: $e'));
+    }
+  }
+
+  @override
+  Future<Result<void, TaskSourceError>> clear() async {
+    // Az érvénytelennek bizonyult cache eldobása. Ha nincs fájl, az is siker
+    // (nincs teendő). No-throw: minden hibát Failure-ré fordítunk.
+    try {
+      final file = _file;
+      if (file.existsSync()) {
+        await file.delete();
+      }
+      return const Success<void, TaskSourceError>(null);
+    } on Object catch (e) {
+      return Failure(TaskSourceUnreadable('Cache törlési hiba: $e'));
     }
   }
 }
