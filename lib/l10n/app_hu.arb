@@ -12,5 +12,11 @@
   "quitTitle": "Kilépsz a játékból?",
   "quitConfirm": "Kilépés",
   "quitCancel": "Mégse",
-  "settings": "Beállítások"
+  "settings": "Beállítások",
+  "typeJatek": "Játék",
+  "typeParbaj": "Párbaj",
+  "typeVirus": "Vírus",
+  "typeFeladat": "Feladat",
+  "typeActivity": "Activity",
+  "typeEgyeb": "Egyéb"
 }

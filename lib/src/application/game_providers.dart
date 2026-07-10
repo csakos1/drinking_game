@@ -30,11 +30,13 @@ final drawNextProvider = Provider<DrawNext>((ref) => const DrawNext());
 
 /// A `{team}` placeholder lokalizált csapatcímkéi.
 ///
-/// Alapértelmezésben a v1 magyar címkéi; a presentation-réteg ezt írja majd
-/// felül az ARB-ből származó értékekkel. A domain (`DrawNext`) csak ezt a
-/// leképezést kapja, l10n-t nem ismer.
+/// A v1 magyar címkéi, szándékosan megegyeznek az ARB `firstTeam`/`secondTeam`
+/// értékeivel (egynyelvű v1). A domain (`DrawNext`) csak ezt a leképezést kapja,
+/// l10n-t nem ismer; a kártya-réteg ugyanezekre a címkékre színez rá a
+/// szövegben, így a kiemelés egyezése garantált. Egy második nyelvnél a
+/// presentation innen, context-függő módon írná felül.
 final teamLabelsProvider = Provider<Map<Team, String>>((ref) {
-  return const {Team.first: 'A csapat', Team.second: 'B csapat'};
+  return const {Team.first: 'Első csapat', Team.second: 'Második csapat'};
 });
 
 /// A játék-session állapotgépe: a setup ↔ áttekintő ↔ futó játék átmenetek.

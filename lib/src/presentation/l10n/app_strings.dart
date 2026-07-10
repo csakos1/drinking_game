@@ -68,6 +68,24 @@ class AppStrings {
 
   /// A beállítások felirata.
   String get settings => 'Beállítások';
+
+  /// A `jatek` típus címkéje a kártyán.
+  String get typeJatek => 'Játék';
+
+  /// A `parbaj` típus címkéje a kártyán.
+  String get typeParbaj => 'Párbaj';
+
+  /// A `virus` típus címkéje a kártyán.
+  String get typeVirus => 'Vírus';
+
+  /// A `feladat` típus címkéje a kártyán.
+  String get typeFeladat => 'Feladat';
+
+  /// Az `activity` típus címkéje a kártyán.
+  String get typeActivity => 'Activity';
+
+  /// Az `egyeb` típus címkéje a kártyán.
+  String get typeEgyeb => 'Egyéb';
 }
 
 class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {
