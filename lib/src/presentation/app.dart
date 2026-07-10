@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:igyal2/src/application/game_providers.dart';
 import 'package:igyal2/src/application/game_session.dart';
 import 'package:igyal2/src/presentation/l10n/app_strings.dart';
+import 'package:igyal2/src/presentation/screens/setup_screen.dart';
 import 'package:igyal2/src/presentation/theme/app_colors.dart';
 import 'package:igyal2/src/presentation/theme/app_theme.dart';
 
@@ -38,8 +39,9 @@ class IgyalApp extends StatelessWidget {
 /// A `GameSession`-re kapcsoló képernyő-router.
 ///
 /// A fő folyamot az állapotgép vezérli (nincs explicit Navigator): a sealed
-/// [GameSession] konkrét típusa dönti el, melyik képernyő látszik. P1-ben még
-/// témázott placeholderek állnak a valós képernyők helyén (P2–P4).
+/// [GameSession] konkrét típusa dönti el, melyik képernyő látszik. A setup
+/// (P2) már a valós [SetupScreen]; a csapat-áttekintő és a kártya (P3–P4) még
+/// témázott placeholder.
 class _SessionRouter extends ConsumerWidget {
   const _SessionRouter();
 
@@ -47,7 +49,7 @@ class _SessionRouter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(gameSessionProvider);
     return switch (session) {
-      GameSetup() => const _Placeholder(label: 'Setup', portrait: true),
+      GameSetup() => const SetupScreen(),
       GameTeams() => const _Placeholder(label: 'Csapatok', portrait: false),
       GamePlaying() => const _Placeholder(label: 'Kártya', portrait: false),
     };

@@ -28,11 +28,8 @@ class AppStrings {
   /// A támogatott nyelvek (v1: csak magyar).
   static const List<Locale> supportedLocales = [Locale('hu')];
 
-  /// Az app neve.
+  /// Az app neve (a setup-képernyő címeként is ez jelenik meg).
   String get appTitle => 'Igyál 2';
-
-  /// A setup-képernyő üdvözlő címe.
-  String get setupWelcome => 'Üdvözlet az Igyál 2-ben!';
 
   /// Az első csapat neve/felirata.
   String get firstTeam => 'Első csapat';

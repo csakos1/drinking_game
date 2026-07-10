@@ -1,7 +1,6 @@
 {
   "@@locale": "hu",
   "appTitle": "Igyál 2",
-  "setupWelcome": "Üdvözlet az Igyál 2-ben!",
   "firstTeam": "Első csapat",
   "secondTeam": "Második csapat",
   "autoSplitTip": "Ha csak az első csapathoz adsz meg játékosokat, a játék automatikusan szétosztja őket.",
