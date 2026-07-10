@@ -1,17 +1,14 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:igyal2/main.dart';
+import 'package:igyal2/src/presentation/app.dart';
 
 void main() {
-  // Smoke teszt: csak azt ellenőrzi, hogy az app gyökérwidgetje
-  // hiba nélkül felépül és renderel. A tényleges viselkedést a domain-
-  // és widget-tesztek fedik le, ahogy a rétegek felépülnek; ez a teszt
-  // addig is életben tartja a test/ könyvtárat és a pre-flight tesztlépését.
-  testWidgets('MainApp builds and renders without error', (tester) async {
-    // Given-When: az app gyökere beépül a widgetfába.
-    await tester.pumpWidget(const MainApp());
+  testWidgets('indításkor a setup állapot placeholderje jelenik meg', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const ProviderScope(child: IgyalApp()));
+    await tester.pump();
 
-    // Then: a MaterialApp jelen van, a fa hiba nélkül felépült.
-    expect(find.byType(MaterialApp), findsOneWidget);
+    expect(find.text('Setup'), findsOneWidget);
   });
 }

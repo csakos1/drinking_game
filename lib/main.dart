@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:igyal2/src/application/content_providers.dart';
+import 'package:igyal2/src/presentation/app.dart';
 import 'package:path_provider/path_provider.dart';
 
 Future<void> main() async {
@@ -26,28 +27,7 @@ Future<void> main() async {
   runApp(
     UncontrolledProviderScope(
       container: container,
-      child: const MainApp(),
+      child: const IgyalApp(),
     ),
   );
-}
-
-/// Az alkalmazás gyökérwidgetje.
-///
-/// Egyelőre a Flutter-scaffold Hello World tartalmát mutatja; a tényleges
-/// setup- és kártyafolyam-képernyők a presentation-réteg felépülésével kerülnek
-/// a helyére.
-class MainApp extends StatelessWidget {
-  /// Létrehoz egy [MainApp] példányt.
-  const MainApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
-    );
-  }
 }
