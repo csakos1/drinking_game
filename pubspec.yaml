@@ -22,6 +22,6 @@ flutter:
   assets:
     - assets/content/tasks.json
   fonts:
-    - family: Bangers
+    - family: TitanOne
       fonts:
-        - asset: assets/fonts/Bangers-Regular.ttf
+        - asset: assets/fonts/TitanOne-Regular.ttf
