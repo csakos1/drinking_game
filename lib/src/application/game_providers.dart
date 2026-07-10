@@ -7,6 +7,7 @@ import 'package:igyal2/src/domain/draw_next.dart';
 import 'package:igyal2/src/domain/draw_teams.dart';
 import 'package:igyal2/src/domain/player.dart';
 import 'package:igyal2/src/domain/result.dart';
+import 'package:igyal2/src/domain/roster.dart';
 import 'package:igyal2/src/domain/start_game.dart';
 import 'package:igyal2/src/domain/task_template.dart';
 import 'package:igyal2/src/domain/team.dart';
@@ -36,94 +37,133 @@ final teamLabelsProvider = Provider<Map<Team, String>>((ref) {
   return const {Team.first: 'A csapat', Team.second: 'B csapat'};
 });
 
-/// A játék-session állapotgépe: a setup ↔ futó játék átmeneteket vezérli.
+/// A játék-session állapotgépe: a setup ↔ áttekintő ↔ futó játék átmenetek.
 final gameSessionProvider = NotifierProvider<GameSessionNotifier, GameSession>(
   GameSessionNotifier.new,
 );
 
-/// A [GameSession] állapotát kezelő `Notifier`.
+/// A [GameSession] állapotát kezelő `Notifier` (lásd ADR-0003).
 ///
-/// A setup-műveletek (név hozzáadása/törlése, sorsolás, kézi korrekció) a
-/// [GameSetup]-ot léptetik; az [start] a `StartGame`→`DrawNext` láncot futtatja
-/// és [GamePlaying]-re vált; a [next] lépteti a kártyát; a [quit] a keret
-/// megőrzésével visszatér a setup-ba. A véletlen és a use case-ek providerekből
-/// jönnek, így tesztben felülírhatók.
+/// A setup két csapatba veszi fel a neveket ([add]/[remove]); a [proceed]
+/// (IGYUNK) a feltételes csapatalkotást végzi és [GameTeams]-re vált; onnan a
+/// [start] (KEZDÉS) a `StartGame`→`DrawNext` láncot futtatja és [GamePlaying]-re
+/// vált, a [redraw] újrasorsol (csak auto-splitnél), a [backToSetup] visszalép
+/// szerkesztésre. A [next] lépteti a kártyát; a [quit] a keret megőrzésével az
+/// áttekintőbe tér vissza. A véletlen és a use case-ek providerekből jönnek, így
+/// tesztben felülírhatók.
 class GameSessionNotifier extends Notifier<GameSession> {
-  /// A futó játékhoz tartozó sablon-térkép (id → sablon), az [start]-nál
+  /// A futó játékhoz tartozó sablon-térkép (id → sablon), a [start]-nál
   /// pillanatképként rögzítve, hogy egy háttér-tartalomfrissítés ne cserélje ki
   /// a pakli mögötti sablonokat menet közben. A notifier élettartamával együtt
   /// nullázódik.
   Map<String, TaskTemplate>? _templatesById;
 
   @override
-  GameSession build() => const GameSetup(names: []);
+  GameSession build() => const GameSetup();
 
-  /// Hozzáad egy nevet a setup-listához (trimmelve). Üres vagy már meglévő
-  /// nevet figyelmen kívül hagy. A névlista változása üríti a sorsolt keretet.
-  void addName(String name) {
+  /// Felvesz egy nevet a [team] csapatba (trimmelve). Üres nevet, illetve a két
+  /// csapaton keresztül már meglévő nevet figyelmen kívül hagy.
+  void add(String name, Team team) {
     final session = state;
     if (session is! GameSetup) {
       return;
     }
     final trimmed = name.trim();
-    if (trimmed.isEmpty || session.names.contains(trimmed)) {
+    if (trimmed.isEmpty ||
+        session.firstNames.contains(trimmed) ||
+        session.secondNames.contains(trimmed)) {
       return;
     }
-    state = GameSetup(names: [...session.names, trimmed]);
+    state = switch (team) {
+      Team.first => GameSetup(
+        firstNames: [...session.firstNames, trimmed],
+        secondNames: session.secondNames,
+      ),
+      Team.second => GameSetup(
+        firstNames: session.firstNames,
+        secondNames: [...session.secondNames, trimmed],
+      ),
+    };
   }
 
-  /// Töröl egy nevet a setup-listából. A névlista változása üríti a sorsolt
-  /// keretet.
-  void removeName(String name) {
-    final session = state;
-    if (session is! GameSetup || !session.names.contains(name)) {
-      return;
-    }
-    state = GameSetup(names: [...session.names]..remove(name));
-  }
-
-  /// Két csapatba sorsolja a jelenlegi neveket. Legalább két név kell hozzá.
-  void drawTeams() {
-    final session = state;
-    if (session is! GameSetup || session.names.length < 2) {
-      return;
-    }
-    final roster = ref.read(drawTeamsProvider)(
-      session.names,
-      ref.read(randomProvider),
-    );
-    state = GameSetup(names: session.names, roster: roster);
-  }
-
-  /// A [player] átmozgatása a másik csapatba (kézi korrekció). Sorsolt keret
-  /// nélkül nincs hatása.
-  void moveToOtherTeam(Player player) {
+  /// Töröl egy nevet a [team] csapatból.
+  void remove(String name, Team team) {
     final session = state;
     if (session is! GameSetup) {
       return;
     }
-    final roster = session.roster;
-    if (roster == null) {
+    state = switch (team) {
+      Team.first => GameSetup(
+        firstNames: [...session.firstNames]..remove(name),
+        secondNames: session.secondNames,
+      ),
+      Team.second => GameSetup(
+        firstNames: session.firstNames,
+        secondNames: [...session.secondNames]..remove(name),
+      ),
+    };
+  }
+
+  /// Feltételes csapatalkotás (IGYUNK): üres második csapat + legalább két név
+  /// az elsőben → véletlen `DrawTeams`-felosztás; egyébként kézi keret (első
+  /// lista → [Team.first], második → [Team.second]). Csak [GameSetup]-ban és
+  /// [GameSetup.canProceed] esetén hat. Az eredmény [GameTeams].
+  void proceed() {
+    final session = state;
+    if (session is! GameSetup || !session.canProceed) {
+      return;
+    }
+    if (session.secondNames.isEmpty) {
+      final roster = ref.read(drawTeamsProvider)(
+        session.firstNames,
+        ref.read(randomProvider),
+      );
+      state = GameTeams(roster: roster, wasAutoSplit: true);
+    } else {
+      state = GameTeams(
+        roster: _manualRoster(session.firstNames, session.secondNames),
+        wasAutoSplit: false,
+      );
+    }
+  }
+
+  /// Újrasorsolja a csapatokat az áttekintőben — csak akkor, ha a keret
+  /// auto-splitből jött ([GameTeams.wasAutoSplit]). A keret jelenlegi neveiből
+  /// új `DrawTeams`-felosztást készít.
+  void redraw() {
+    final session = state;
+    if (session is! GameTeams || !session.wasAutoSplit) {
+      return;
+    }
+    final names = [for (final player in session.roster.players) player.name];
+    final roster = ref.read(drawTeamsProvider)(names, ref.read(randomProvider));
+    state = GameTeams(roster: roster, wasAutoSplit: true);
+  }
+
+  /// Visszalép az áttekintőből a setupba szerkesztésre: a keret két csapatából
+  /// visszaállítja a `firstNames`/`secondNames` listákat.
+  void backToSetup() {
+    final session = state;
+    if (session is! GameTeams) {
       return;
     }
     state = GameSetup(
-      names: session.names,
-      roster: roster.moveToOtherTeam(player),
+      firstNames: [for (final player in session.roster.first) player.name],
+      secondNames: [for (final player in session.roster.second) player.name],
     );
   }
 
-  /// Elindítja a játékot: felépíti a paklit, és megjeleníti az első kártyát.
-  ///
-  /// Csak indítható keretből ([GameSetup.canStart]) hat. A tartalmat a
-  /// [taskContentProvider]-ből tölti (offline-first, gyors, lokális), majd a
-  /// pakli mögötti sablonokat pillanatképként rögzíti a session idejére.
+  /// Elindítja a játékot (KEZDÉS): felépíti a paklit, és megjeleníti az első
+  /// kártyát. Csak [GameTeams]-ből hat. A tartalmat a [taskContentProvider]-ből
+  /// tölti (offline-first), majd a pakli mögötti sablonokat pillanatképként
+  /// rögzíti a session idejére.
   Future<void> start() async {
     final session = state;
-    if (session is! GameSetup) {
+    if (session is! GameTeams) {
       return;
     }
     final roster = session.roster;
-    if (roster == null || !roster.isStartable) {
+    if (!roster.isStartable) {
       return;
     }
 
@@ -174,16 +214,22 @@ class GameSessionNotifier extends Notifier<GameSession> {
     );
   }
 
-  /// Kilép a futó játékból, és a keret megőrzésével visszatér a setup-ba.
+  /// Kilép a futó játékból, és a keret megőrzésével az áttekintőbe tér vissza.
   void quit() {
     final session = state;
     if (session is! GamePlaying) {
       return;
     }
     _templatesById = null;
-    state = GameSetup(
-      names: [for (final player in session.roster.players) player.name],
-      roster: session.roster,
-    );
+    state = GameTeams(roster: session.roster, wasAutoSplit: false);
+  }
+
+  /// A két névlistából kézi keretet épít: az [first] a [Team.first]-be, a
+  /// [second] a [Team.second]-be, változatlan sorrendben.
+  Roster _manualRoster(List<String> first, List<String> second) {
+    return Roster([
+      for (final name in first) Player(name: name, team: Team.first),
+      for (final name in second) Player(name: name, team: Team.second),
+    ]);
   }
 }
